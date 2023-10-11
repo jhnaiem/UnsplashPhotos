@@ -10,13 +10,24 @@ import javax.inject.Inject
 class PhotoRepoImpl @Inject constructor(
     private val photoDataSource: PhotoDataSource,
     private val photoRemoteToPhotoMapper: PhotoRemoteToPhotoMapperImpl,
+    private val photoCacheDataSource: PhotoCacheDataSource
 ) : PhotoRepo {
-
     override suspend fun getPhotos(page: Int, perPage: Int): DataState<List<Photo>> {
-        return getPhotosFromAPI(page, perPage)
+        val fetchedList = getPhotosFromCache(page, perPage)
+
+        return if (fetchedList.isNotEmpty()) {
+            DataState.Success(fetchedList)
+        } else {
+            DataState.Error(Exception("Unknown error"))
+        }
     }
 
     override suspend fun getPhotoById(photoId: String): DataState<Photo> {
+        val fetchedPhoto = getPhotoFromCache(photoId)
+        return if (fetchedPhoto != null) {
+            DataState.Success(fetchedPhoto)
+        } else {
+            DataState.Error(Exception("Photo fetching failed"))
         val response = photoDataSource.getPhotoById(photoId)
         val body = response.body()
         Timber.tag("T===>").i("Photo: %s", body)
@@ -27,19 +38,61 @@ class PhotoRepoImpl @Inject constructor(
         }
     }
 
-    private suspend fun getPhotosFromAPI(page: Int, perPage: Int): DataState<List<Photo>> {
+    private suspend fun getPhotosFromCache(page: Int, perPage: Int): List<Photo> {
+        val photoList: List<Photo>
+        val cachePhotos = photoCacheDataSource.getPhotosFromCache(page)
+        if (cachePhotos == null) {
+            photoList = getPhotosFromAPI(page, perPage)
+            photoCacheDataSource.savePhotosToCache(page, photoList)
+        } else {
+            photoList = cachePhotos
+        }
+        return photoList
+    }
+
+    private suspend fun getPhotoFromCache(photoId: String): Photo? {
+        val photo: Photo?
+        val cachedPhoto = photoCacheDataSource.getPhotoFromCache(photoId)
+        if (cachedPhoto == null) {
+            photo = getPhotoFromApiById(photoId)
+            if (photo != null)
+                photoCacheDataSource.savePhotoToCache(photoId, photo)
+        } else {
+            photo = cachedPhoto
+        }
+        return photo
+    }
+
+    private suspend fun getPhotosFromAPI(page: Int, perPage: Int): List<Photo> {
         var photoList = listOf<Photo>()
 
-        val response = photoDataSource.getPhotos(page, perPage)
-        if (!response.isSuccessful) {
-            return DataState.Error(Exception(response.message() ?: "Unknown error"))
-        }
-        val body = response.body()
-        if (body != null) {
-            photoList = body.map { photoRemoteToPhotoMapper.mapFromEntity(it) }
-        }
+        try {
+            val response = photoDataSource.getPhotos(page, perPage)
+            val body = response.body()
+            Timber.tag("===>").d("CheckPoint 1%s", body);
 
-        Timber.tag("===>").d("CheckPoint: %s", photoList)
-        return DataState.Success(photoList)
+            if (body != null) {
+                photoList = body.map { photoRemoteToPhotoMapper.mapFromEntity(it) }
+            }
+        } catch (exception: Exception) {
+            Timber.e(exception.message.toString())
+        }
+        return photoList
+    }
+
+    private suspend fun getPhotoFromApiById(photoId: String): Photo? {
+        var photoStore: Photo? = null
+        try {
+            val response = photoDataSource.getPhotoById(photoId)
+            val body = response.body()
+            Timber.tag("T===>").i("Photo: %s", body)
+
+            if (body != null) {
+                photoStore = photoRemoteToPhotoMapper.mapFromEntity(body)
+            }
+        } catch (exception: Exception) {
+            Timber.e(exception.message.toString())
+        }
+        return photoStore
     }
 }

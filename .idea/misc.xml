@@ -7,6 +7,8 @@
         <entry key="app/src/main/res/layout/fragment_gallery.xml" value="0.11220871327254306" />
         <entry key="app/src/main/res/layout/fragment_photo_full_screen.xml" value="0.11220871327254306" />
         <entry key="app/src/main/res/layout/item_photo.xml" value="0.11220871327254306" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.20208333333333334" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.33240740740740743" />
       </map>
     </option>
   </component>

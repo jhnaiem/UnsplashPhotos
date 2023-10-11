@@ -42,7 +42,7 @@
             android:fontFamily="sans-serif-medium"
             android:text="@{photoFullScreen.altDescription}"
             android:textAlignment="center"
-            android:textColor="#24252E"
+            android:textColor = "?android:textColorPrimary"
             android:textSize="18sp"
             android:backgroundTint="@color/cardview_light_background"
             app:layout_constraintEnd_toEndOf="parent"

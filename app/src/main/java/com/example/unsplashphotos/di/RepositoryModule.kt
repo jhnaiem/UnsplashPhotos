@@ -1,8 +1,6 @@
 package com.example.unsplashphotos.di
 
-import com.example.unsplashphotos.data.repository.PhotoDataSource
-import com.example.unsplashphotos.data.repository.PhotoDataSourceImpl
-import com.example.unsplashphotos.data.repository.PhotoRepoImpl
+import com.example.unsplashphotos.data.repository.*
 import com.example.unsplashphotos.domain.repository.PhotoRepo
 import dagger.Binds
 import dagger.Module
@@ -18,7 +16,12 @@ interface RepositoryModule {
     @Singleton
     abstract fun bindPhotoDataSource(photoDataSourceImpl: PhotoDataSourceImpl): PhotoDataSource
 
+    @Binds
+    @Singleton
+    abstract fun bindPhotoCacheDataSource(photoCacheDataSourceImpl: PhotoCacheDataSourceImpl): PhotoCacheDataSource
+
     @Singleton
     @Binds
     abstract fun getPhotoRepository(photoRepoImpl: PhotoRepoImpl): PhotoRepo
 }
+

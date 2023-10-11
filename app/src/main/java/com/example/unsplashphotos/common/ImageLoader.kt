@@ -13,7 +13,7 @@ class ImageLoader(private val context: Context) {
         url: String,
         imageView: ImageView,
     ) {
-        Glide.with(context)
+        GlideApp.with(context)
             .load(url)
             .centerCrop()
             .diskCacheStrategy(DiskCacheStrategy.ALL)

@@ -22,3 +22,4 @@ class PhotoDataSourceImpl @Inject constructor(
         return photo
     }
 }
+

@@ -131,6 +131,7 @@ dependencies {
     //logger
     implementation "com.jakewharton.timber:timber:${versions.timber}"
 
+    kapt "com.google.dagger:dagger-android-processor:2.11"
     //compose
     implementation "androidx.compose.animation:animation:${versions.compose_version}"
     implementation "androidx.compose.foundation:foundation:${versions.compose_version}"
@@ -156,5 +157,4 @@ dependencies {
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.25.0"
 
     implementation 'com.github.jhnaiem:BitmapDrawableSharer:1.1.0'
-
 }
